@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mu.common.mapper.MsgLogMapper">
+
+    <select id="getTimeoutMsg" resultType="MsgLog">
+        select *
+        from msg_log
+        where status = 1
+          and next_try_time &lt;= now();
+    </select>
+
+    <select id="getMsgId" resultType="MsgLog" parameterType="String">
+        select *
+        from msg_log
+        where msg_id = #{msgId};
+    </select>
+
+    <update id="updateStatus">
+        update msg_log
+        set status      = #{status},
+            update_time = now()
+        where msg_id = #{msgId}
+    </update>
+
+    <insert id="insertMsgLog" parameterType="MsgLog">
+        insert into msg_log (msg_id,
+                             msg,
+                             exchange,
+                             routing_key,
+                             status,
+                             try_count,
+                             next_try_time,
+                             create_time,
+                             update_time)
+        value (#{msgId}, #{msg}, #{exchange}, #{routingKey}, 0, 0, #{nextTryTime}, now(), #{updateTime})
+    </insert>
+
+    <update id="updateTryCount">
+        update msg_log
+        set try_count     = try_count + 1,
+            next_try_time = #{nextTryTime},
+            update_time   = now()
+        where msg_id =
+              #{msgId}
+    </update>
+</mapper>

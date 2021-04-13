@@ -1,0 +1,54 @@
+logging:
+  config: logback-spring.xml
+  level:
+    com:
+      mu:
+        demo:
+          mapper: trace
+---
+#mybatis:
+#  configuration:
+#    map-underscore-to-camel-case: true
+#  mapper-locations: classpath:mapper/*.xml
+#  type-aliases-package: com.mu.auth.entity
+---
+server:
+  port: 8081
+spring:
+  profiles:
+    active: dev
+---
+spring:
+  profiles: dev
+  cache:
+    ehcache:
+      config: classpath:ehcache.xml
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+    password: root
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/demo?characterEncoding=utf-8
+    username: root
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+  thymeleaf:
+    cache: false
+    encoding: utf-8
+    mode: HTML5
+    prefix: classpath:/template/
+    suffix: .html
+    #当前服务名称
+  application:
+    name:  eureka-auth
+
+# 指定当前eureka客户端的注册地址,
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:8700/eureka
+  instance:
+    hostname: localhost
