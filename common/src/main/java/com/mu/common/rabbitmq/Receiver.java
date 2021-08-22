@@ -11,8 +11,12 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
@@ -27,35 +31,35 @@ public class Receiver {
     @Autowired
     private MsgLogService msgLogService;
 
-    @Autowired
-    private MailUtil mailUtil;
+    @Resource
+    private JavaMailSender mailSender;
 
     /**
      * 接收消息的方法，采用的RabbitMQ的监听机制方式
      *
-     * @param message
-     * @param channel
+     * @param message message
+     * @param channel channel
      */
 
     @RabbitListener(queues = QueueConfig.MAIL_QUEUE_NAME)
     public void consume(Message message, Channel channel) throws IOException {
         Mail mail = MessageHelper.msgToObj(message, Mail.class);
-        LOGGER.info("收到消息: {}", mail.toString());
+        LOGGER.info("received message: {}", mail.toString());
         String msgId = mail.getMsgId();
         MsgLog msgLog = msgLogService.getMsgId(msgId);
         if (null == msgLog || msgLog.getStatus().equals(3)) {
-            LOGGER.info("重复消息,msgId : {}", mail.getMsgId());
+            LOGGER.info("repeat message, msgId : {}", mail.getMsgId());
             return;
         }
-
         MessageProperties messageProperties = message.getMessageProperties();
         long deliveryTag = messageProperties.getDeliveryTag();
-
-        boolean send = mailUtil.send(mail);
-        if (send) {
+        try {
+            SimpleMailMessage mailMessage = MailUtil.send(mail);
+            mailSender.send(mailMessage);
             msgLogService.updateStatus(msgId, 3);
+            // 手动设置Ack为false
             channel.basicAck(deliveryTag, false);
-        } else {
+        } catch (MailException ex) {
             channel.basicNack(deliveryTag, false, true);
         }
 

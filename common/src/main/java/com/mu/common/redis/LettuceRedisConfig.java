@@ -1,5 +1,6 @@
 package com.mu.common.redis;
 
+import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
 
 import java.time.Duration;
 
@@ -22,27 +23,23 @@ import java.time.Duration;
  * @author 穆江魁
  */
 @Configuration
-@PropertySource("classpath:redis.properties")
+@PropertySource("classpath:redis/redis.properties")
 public class LettuceRedisConfig {
-
     /**
      * 数据库索引
      */
     @Value("${spring.redis.database}")
     private int database;
-
     /**
      * 连接地址
      */
     @Value("${spring.redis.host}")
     private String host;
-
     /**
      * 密码
      */
     @Value("${spring.redis.password}")
     private String password;
-
     /**
      * 端口
      */
@@ -54,13 +51,11 @@ public class LettuceRedisConfig {
      */
     @Value("${spring.redis.timeout}")
     private long timeout;
-
     /**
      * 最大空闲连接
      */
     @Value("${spring.redis.lettuce.pool.max-idle}")
     private int maxIdle;
-
     /**
      * 最小空闲连接
      */
@@ -72,25 +67,42 @@ public class LettuceRedisConfig {
      */
     @Value("${spring.redis.lettuce.pool.max-active}")
     private int maxActive;
-
     /**
      * 最大阻塞等待时间
      */
     @Value("${spring.redis.lettuce.pool.max-wait}")
     private long maxWait;
+    /**
+     * 过期时间
+     */
+    @Value("${spring.redis.expireSeconds}")
+    private long expireSeconds;
+
+    @Value("${spring.redis.commandTimeout}")
+    private long commandTimeout;
+
+    @Value("${spring.redis.clusterNodes}")
+    private String clusterNodes;
+
 
     /**
      * 1.配置RedisTemplate,实现自定义的序列化，
      */
-
     @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(factory);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        // 使用 GenericFastJsonRedisSerializer 替换默认序列化
+        GenericFastJsonRedisSerializer genericFastJsonRedisSerializer = new GenericFastJsonRedisSerializer();
+        // 设置key和value的序列化规则
+        redisTemplate.setKeySerializer(new GenericToStringSerializer<>(Object.class));
+        redisTemplate.setValueSerializer(genericFastJsonRedisSerializer);
+        // 设置hashKey和hashValue的序列化规则
+        redisTemplate.setHashKeySerializer(new GenericToStringSerializer<>(Object.class));
+        redisTemplate.setHashValueSerializer(genericFastJsonRedisSerializer);
+        // 设置支持事物
+        redisTemplate.setEnableTransactionSupport(true);
+        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
 

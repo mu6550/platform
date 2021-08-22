@@ -10,9 +10,10 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.Resource;
 
 /**
  * 消息队列的配置类
@@ -21,13 +22,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class QueueConfig {
 
-    public static final String MAIL_QUEUE_NAME = "mail.queue";
     public static final String MAIL_EXCHANGE_NAME = "mail.exchange";
     public static final String MAIL_ROUTING_KEY_NAME = "mail.routing.key";
-    private final static Logger LOGGER = LoggerFactory.getLogger(QueueConfig.class);
-    @Autowired
+    public static final String MAIL_QUEUE_NAME = "mail.queue";
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueueConfig.class);
+
+    @Resource
     private CachingConnectionFactory cachingConnectionFactory;
-    @Autowired
+
+    @Resource
     private MsgLogService msgLogService;
 
     @Bean
@@ -36,18 +39,18 @@ public class QueueConfig {
         rabbitTemplate.setMessageConverter(converter());
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
-                LOGGER.info("消息成功发送到Exchange");
+                LOGGER.info("message success send to exchange");
                 String msgId = correlationData.getId();
                 // 更新数据到数据库
                 msgLogService.updateStatus(msgId, 1); // 1 表示投递成功
             } else {
-                LOGGER.error("消息发送到Exchange失败{}：-----,{}" + correlationData, cause);
+                LOGGER.error("message send exchange fail {}：-----{}" + correlationData, cause);
             }
         });
         rabbitTemplate.setMandatory(true);
         rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -> {
-            LOGGER.error("消息发送到Exchange路到Queue失败 exchange: {}routingKey: {} " +
-                            "message: {} replyCode: {} replyText: {}",
+            LOGGER.error("message send to exchange router Queue fail exchange: {}, routingKey: {}, " +
+                            "message: {}, replyCode: {}, replyText: {}",
                     exchange, routingKey, message, replyCode, replyText);
         });
         return rabbitTemplate;
@@ -61,7 +64,7 @@ public class QueueConfig {
     /**
      * 创建队列
      *
-     * @return
+     * @return Queue
      */
     @Bean
     public Queue createQueue() {
@@ -71,7 +74,7 @@ public class QueueConfig {
     /**
      * 创建交换机
      *
-     * @return
+     * @return DirectExchange
      */
     @Bean
     public DirectExchange mailExchange() {
@@ -81,7 +84,7 @@ public class QueueConfig {
     /**
      * 消息队列的在交换机下的匹配规则
      *
-     * @return
+     * @return Binding
      */
     @Bean
     public Binding mailBinding() {

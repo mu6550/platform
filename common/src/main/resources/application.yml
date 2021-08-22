@@ -1,10 +1,4 @@
-logging:
-  config: logback-spring.xml
-  level:
-    com:
-      mu:
-        demo:
-          mapper: trace
+
 ---
 mybatis:
   configuration:
@@ -24,12 +18,12 @@ spring:
     ehcache:
       config: classpath:ehcache.xml
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
-    password: root
+    password: 123456
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://localhost:3306/demo?characterEncoding=utf-8
+    url: jdbc:mysql://192.168.200.22:3306/platform?characterEncoding=utf-8
     username: root
   mail:
     host: smtp.qq.com
@@ -49,21 +43,6 @@ spring:
     publisher-confirms: true
     publisher-returns: true
     username: guest
-  redis:
-    clusterNodes: 10.102.*.*:6279,10.102.*.*:6379
-    commandTimeout: 5000ms
-    database: 6
-    expireSeconds: 120ms
-    host: 127.0.0.1
-    lettuce:
-      pool:
-        max-active: 50
-        max-idle: 20
-        max-wait: 3000ms
-        min-idle: 2
-    password: 123456
-    port: 6379
-    timeout: 5000ms
   servlet:
     multipart:
       max-file-size: 10MB

@@ -26,7 +26,7 @@
     </cache>
 
     <!--
-http://www.ehcache.org/ehcache.xsd　　　　文件idea报错，可以访问地址，将文件下载后引入项目，或者忽略报错，测试报错不影响使用
+http://www.ehcache.org/ehcache.xsd文件idea报错，可以访问地址，将文件下载后引入项目，或者忽略报错，测试报错不影响使用
 
            diskStore:设置缓存文件 .data 的创建路径
                        user.home – 用户主目录;

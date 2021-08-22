@@ -8,7 +8,7 @@ public interface MailService {
     /**
      * 发送邮件
      *
-     * @param mail
+     * @param mail mail
      * @return
      */
     R sendMail(Mail mail);
@@ -20,5 +20,11 @@ public interface MailService {
      */
     String getMailSendFrom();
 
+    /**
+     * 保存邮箱信息
+     *
+     * @param mail mail
+     * @return
+     */
     R saveMsg(Mail mail);
 }

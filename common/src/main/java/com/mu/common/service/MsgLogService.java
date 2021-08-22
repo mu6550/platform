@@ -9,21 +9,21 @@ public interface MsgLogService {
     /**
      * 插入消息
      *
-     * @param msgLog
+     * @param msgLog msgLog
      */
     void insertMsgLog(MsgLog msgLog);
 
     /**
      * 更新状态
      *
-     * @param msgLog
+     * @param msgLog msgLog
      */
     void updateStatus(String msgLog, Integer status);
 
     /**
      * 查询消息(是否消息过)
      *
-     * @param msgId
+     * @param msgId msgId
      * @return
      */
     MsgLog getMsgId(String msgId);
@@ -38,8 +38,8 @@ public interface MsgLogService {
     /**
      * 更新重新投递次数
      *
-     * @param msgId
-     * @param nextTryTime
+     * @param msgId msgId
+     * @param nextTryTime nextTryTime
      */
     void updateTryCount(String msgId, String nextTryTime);
 }

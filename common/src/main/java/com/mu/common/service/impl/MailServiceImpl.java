@@ -6,8 +6,8 @@ import com.mu.common.interceptor.MyInterceptor;
 import com.mu.common.rabbitmq.QueueConfig;
 import com.mu.common.service.MailService;
 import com.mu.common.service.MsgLogService;
-import com.mu.common.util.MailUtil;
 import com.mu.common.util.R;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -15,7 +15,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.UUID;
 
@@ -32,9 +31,6 @@ public class MailServiceImpl implements MailService {
 
     @Autowired
     private JavaMailSenderImpl mailSender;
-
-    @Autowired
-    private MailUtil mailUtil;
 
     @Override
     public R sendMail(Mail mail) {
